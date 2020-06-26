@@ -5,7 +5,8 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.RecyclerView.ViewHolder
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import io.supercharge.shimmerlayout.ShimmerLayout
+import com.facebook.shimmer.Shimmer
+import com.facebook.shimmer.ShimmerFrameLayout
 
 /**
  * Created by ethanhua on 2017/7/29.
@@ -16,7 +17,7 @@ class SkeletonAdapter : RecyclerView.Adapter<ViewHolder>() {
     private var layoutArrayReferences: IntArray? = null
     private var color = 0
     private var shimmer = false
-    private var shimmerDuration = 0
+    private var shimmerDuration = 0L
     private var shimmerAngle = 0
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -30,11 +31,18 @@ class SkeletonAdapter : RecyclerView.Adapter<ViewHolder>() {
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         if (shimmer) {
-            val layout = holder.itemView as ShimmerLayout
-            layout.setShimmerAnimationDuration(shimmerDuration)
-            layout.setShimmerAngle(shimmerAngle)
-            layout.setShimmerColor(color)
-            layout.startShimmerAnimation()
+            val layout = holder.itemView as ShimmerFrameLayout
+            val shimmerBuilder = Shimmer.ColorHighlightBuilder()
+            val shimmer = shimmerBuilder
+                    .setDuration(shimmerDuration)
+                    .setBaseAlpha(1f)
+                    .setDropoff(0.2f)
+                    .setBaseColor(color)
+                    .setHighlightColor(color)
+                    .setTilt(shimmerAngle.toFloat())
+                    .build()
+            layout.setShimmer(shimmer)
+            layout.startShimmer()
         }
     }
 
@@ -72,7 +80,7 @@ class SkeletonAdapter : RecyclerView.Adapter<ViewHolder>() {
         this.shimmer = shimmer
     }
 
-    fun setShimmerDuration(shimmerDuration: Int) {
+    fun setShimmerDuration(shimmerDuration: Long) {
         this.shimmerDuration = shimmerDuration
     }
 

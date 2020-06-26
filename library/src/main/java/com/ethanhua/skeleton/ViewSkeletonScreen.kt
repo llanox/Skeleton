@@ -9,7 +9,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnAttachStateChangeListener
 import android.view.ViewGroup
-import io.supercharge.shimmerlayout.ShimmerLayout
+import com.facebook.shimmer.Shimmer
+import com.facebook.shimmer.ShimmerFrameLayout
 
 /**
  * Created by ethanhua on 2017/7/29.
@@ -20,13 +21,21 @@ class ViewSkeletonScreen private constructor(builder: Builder) : SkeletonScreen 
     private val skeletonResID: Int
     private val shimmerColor: Int
     private val shimmer: Boolean
-    private val shimmerDuration: Int
+    private val shimmerDuration: Long
     private val shimmerAngle: Int
-    private fun generateShimmerContainerLayout(parentView: ViewGroup): ShimmerLayout {
-        val shimmerLayout = LayoutInflater.from(actualView.context).inflate(R.layout.layout_shimmer, parentView, false) as ShimmerLayout
-        shimmerLayout.setShimmerColor(shimmerColor)
-        shimmerLayout.setShimmerAngle(shimmerAngle)
-        shimmerLayout.setShimmerAnimationDuration(shimmerDuration)
+    private fun generateShimmerContainerLayout(parentView: ViewGroup): ShimmerFrameLayout {
+        val shimmerLayout = LayoutInflater.from(actualView.context).inflate(R.layout.layout_shimmer, parentView, false) as ShimmerFrameLayout
+        val shimmerBuilder = Shimmer.ColorHighlightBuilder()
+        val shimmer = shimmerBuilder
+                .setDuration(shimmerDuration)
+                .setBaseAlpha(1f)
+                .setDropoff(0.2f)
+                .setTilt(shimmerAngle.toFloat())
+                .setBaseColor(shimmerColor)
+                .setHighlightColor(shimmerColor)
+                .build()
+
+        shimmerLayout.setShimmer(shimmer)
         val innerView = LayoutInflater.from(actualView.context).inflate(skeletonResID, shimmerLayout, false)
         val lp = innerView.layoutParams
         if (lp != null) {
@@ -35,14 +44,14 @@ class ViewSkeletonScreen private constructor(builder: Builder) : SkeletonScreen 
         shimmerLayout.addView(innerView)
         shimmerLayout.addOnAttachStateChangeListener(object : OnAttachStateChangeListener {
             override fun onViewAttachedToWindow(v: View) {
-                shimmerLayout.startShimmerAnimation()
+                shimmerLayout.startShimmer()
             }
 
             override fun onViewDetachedFromWindow(v: View) {
-                shimmerLayout.stopShimmerAnimation()
+                shimmerLayout.stopShimmer()
             }
         })
-        shimmerLayout.startShimmerAnimation()
+        shimmerLayout.startShimmer()
         return shimmerLayout
     }
 
@@ -66,8 +75,8 @@ class ViewSkeletonScreen private constructor(builder: Builder) : SkeletonScreen 
     }
 
     override fun hide() {
-        if (viewReplacer.targetView is ShimmerLayout) {
-            (viewReplacer.targetView as ShimmerLayout?)!!.stopShimmerAnimation()
+        if (viewReplacer.targetView is ShimmerFrameLayout) {
+            (viewReplacer.targetView as ShimmerFrameLayout?)?.stopShimmer()
         }
         viewReplacer.restore()
     }
@@ -78,11 +87,11 @@ class ViewSkeletonScreen private constructor(builder: Builder) : SkeletonScreen 
 
         var shimmer = true
             private set
-
+        @ColorRes
         var shimmerColor: Int
             private set
 
-        var shimmerDuration = 1000
+        var shimmerDuration = 1000L
             private set
 
         var shimmerAngle = 20
@@ -97,10 +106,10 @@ class ViewSkeletonScreen private constructor(builder: Builder) : SkeletonScreen 
         }
 
         /**
-         * @param shimmerColor the shimmer color
+         * @param shimmerColorId the shimmer color id
          */
-        fun color(@ColorRes shimmerColor: Int) = apply {
-            this.shimmerColor = ContextCompat.getColor(view.context, shimmerColor)
+        fun color(@ColorRes shimmerColorId: Int) = apply {
+            this.shimmerColor = ContextCompat.getColor(view.context, shimmerColorId)
         }
 
         /**
@@ -116,7 +125,7 @@ class ViewSkeletonScreen private constructor(builder: Builder) : SkeletonScreen 
          *
          * @param shimmerDuration Duration of the shimmer animation, in milliseconds
          */
-        fun duration(shimmerDuration: Int) = apply {
+        fun duration(shimmerDuration: Long) = apply {
             this.shimmerDuration = shimmerDuration
         }
 

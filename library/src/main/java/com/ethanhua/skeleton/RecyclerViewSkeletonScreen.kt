@@ -56,7 +56,7 @@ class RecyclerViewSkeletonScreen private constructor(builder: Builder) : Skeleto
             private set
         var shimmerColor: Int
             private set
-        var shimmerDuration = 1000
+        var shimmerDuration = 1000L
             private set
         var shimmerAngle = 20
             private set
@@ -91,7 +91,7 @@ class RecyclerViewSkeletonScreen private constructor(builder: Builder) : Skeleto
          *
          * @param shimmerDuration Duration of the shimmer animation, in milliseconds
          */
-        fun duration(shimmerDuration: Int) = apply {
+        fun duration(shimmerDuration: Long) = apply {
             this.shimmerDuration = shimmerDuration
         }
 
